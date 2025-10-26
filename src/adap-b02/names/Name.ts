@@ -10,33 +10,42 @@ import { Printable } from "../common/Printable";
  * 
  * "oss.cs.fau.de" is a name with four name components and the delimiter character '.'.
  * "///" is a name with four empty components and the delimiter character '/'.
- * "Oh\.\.\." is a name with one component, if the delimiter character is '.'.
+ * "Oh\\.\.\." is a name with one component, if the delimiter character is '.'.
  */
-export interface Name extends Printable {
+export abstract class Name implements Printable {
 
-    /**
-     * Returns true, if number of components == 0; else false
-     */
-    isEmpty(): boolean;
+  protected delimiter: string;
+  protected components: string[];
 
-    /** 
-     * Returns number of components in Name instance
-     */
-    getNoComponents(): number;
+  constructor(other: string[], delimiter: string = ".") {
+    this.components = [...other];
+    this.delimiter = delimiter;
+  }
 
-    getComponent(i: number): string;
+  // --- Required by Printable interface ---
+  public getDelimiterCharacter(): string {
+    return this.delimiter;
+  }
 
-    /** Expects that new Name component c is properly masked */
-    setComponent(i: number, c: string): void;
+  // --- Abstract methods (to be implemented by subclasses) ---
 
-    /** Expects that new Name component c is properly masked */
-    insert(i: number, c: string): void;
+  public abstract isEmpty(): boolean;
 
-    /** Expects that new Name component c is properly masked */
-    append(c: string): void;
+  public abstract getNoComponents(): number;
 
-    remove(i: number): void;
-    
-    concat(other: Name): void;
-    
+  public abstract getComponent(i: number): string;
+
+  public abstract setComponent(i: number, c: string): void;
+
+  public abstract insert(i: number, c: string): void;
+
+  public abstract append(c: string): void;
+
+  public abstract remove(i: number): void;
+
+  public abstract concat(other: Name): void;
+
+  public abstract asString(delimiter?: string): string;
+
+  public abstract asDataString(): string;
 }

@@ -1,58 +1,59 @@
-import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
 
-export class StringName implements Name {
+export class StringName extends Name {
 
-    protected delimiter: string = DEFAULT_DELIMITER;
-    protected name: string = "";
-    protected noComponents: number = 0;
+  private name: string;
 
-    constructor(source: string, delimiter?: string) {
-        throw new Error("needs implementation or deletion");
+  constructor(source: string, delimiter: string = ".") {
+    super([], delimiter); // call parent Name constructor first
+    this.name = source;
+  }
+
+  public isEmpty(): boolean {
+    return this.name.length === 0;
+  }
+
+  public getNoComponents(): number {
+    return this.name.split(this.delimiter).length;
+  }
+
+  public getComponent(i: number): string {
+    return this.name.split(this.delimiter)[i];
+  }
+
+  public setComponent(i: number, c: string): void {
+    const parts = this.name.split(this.delimiter);
+    parts[i] = c;
+    this.name = parts.join(this.delimiter);
+  }
+
+  public insert(i: number, c: string): void {
+    const parts = this.name.split(this.delimiter);
+    parts.splice(i, 0, c);
+    this.name = parts.join(this.delimiter);
+  }
+
+  public append(c: string): void {
+    this.name += this.delimiter + c;
+  }
+
+  public remove(i: number): void {
+    const parts = this.name.split(this.delimiter);
+    parts.splice(i, 1);
+    this.name = parts.join(this.delimiter);
+  }
+
+  public concat(other: Name): void {
+    for (let i = 0; i < other.getNoComponents(); i++) {
+      this.append(other.getComponent(i));
     }
+  }
 
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
-    }
+  public asString(delimiter: string = this.delimiter): string {
+    return this.name.split(this.delimiter).join(delimiter);
+  }
 
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getComponent(x: number): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public setComponent(n: number, c: string): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public insert(n: number, c: string): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public append(c: string): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public remove(n: number): void {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
-    }
-
+  public asDataString(): string {
+    return this.name;
+  }
 }
