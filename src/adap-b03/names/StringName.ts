@@ -1,71 +1,51 @@
-import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
-import { Name } from "./Name";
 import { AbstractName } from "./AbstractName";
 
 export class StringName extends AbstractName {
 
-    protected name: string = "";
-    protected noComponents: number = 0;
+    protected raw: string = "";
+    protected delimiter: string;
 
-    constructor(source: string, delimiter?: string) {
+    constructor(raw: string = "", delimiter: string = "/") {
         super();
-        throw new Error("needs implementation or deletion");
+        this.raw = raw;
+        this.delimiter = delimiter;
     }
 
-    public clone(): Name {
-        throw new Error("needs implementation or deletion");
+    // Utility helpers
+    private parts(): string[] {
+        if (this.raw === "") return [];
+        return this.raw.split(this.delimiter);
     }
 
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
+    private update(parts: string[]): void {
+        this.raw = parts.join(this.delimiter);
     }
 
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
+    // ---- Primitive Methods ----
+
+    protected doGetLength(): number {
+        return this.parts().length;
     }
 
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
+    protected doGetComponent(index: number): string {
+        return this.parts()[index];
     }
 
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
+    protected doSetComponent(index: number, c: string): void {
+        let p = this.parts();
+        p[index] = c;
+        this.update(p);
     }
 
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
+    protected doInsert(index: number, c: string): void {
+        let p = this.parts();
+        p.splice(index, 0, c);
+        this.update(p);
     }
 
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+    protected doRemove(index: number): void {
+        let p = this.parts();
+        p.splice(index, 1);
+        this.update(p);
     }
-
-    public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public setComponent(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public insert(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public append(c: string) {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public remove(i: number) {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
-    }
-
 }
