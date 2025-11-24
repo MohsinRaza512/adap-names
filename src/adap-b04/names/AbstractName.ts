@@ -1,57 +1,147 @@
-import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { MethodFailedException } from "../common/MethodFailedException";
+import { InvalidStateException } from "../common/InvalidStateException";
 
 export abstract class AbstractName implements Name {
 
-    protected delimiter: string = DEFAULT_DELIMITER;
+    // ============================================================
+    // PUBLIC METHODS WITH CONTRACTS
+    // ============================================================
 
-    constructor(delimiter: string = DEFAULT_DELIMITER) {
-        throw new Error("needs implementation or deletion");
+    public getLength(): number {
+        const len = this.doGetLength();
+        this.assertInvariant();
+        return len;
     }
 
-    public clone(): Name {
-        throw new Error("needs implementation or deletion");
+    public getComponent(index: number): string {
+        this.assertPreIndex(index);
+        const value = this.doGetComponent(index);
+        this.assertInvariant();
+        return value;
     }
 
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
+    public setComponent(index: number, c: string): void {
+        this.assertPreIndex(index);
+        this.assertPreValue(c);
+
+        const before = this.snapshot();
+        this.doSetComponent(index, c);
+
+        MethodFailedException.assert(this.doGetComponent(index) === c,
+            "postcondition failed: setComponent");
+
+        this.assertInvariant();
     }
 
-    public toString(): string {
-        return this.asDataString();
+    public insert(index: number, c: string): void {
+        this.assertPreInsertIndex(index);
+        this.assertPreValue(c);
+
+        const oldLen = this.doGetLength();
+        const before = this.snapshot();
+
+        this.doInsert(index, c);
+
+        MethodFailedException.assert(this.doGetLength() === oldLen + 1,
+            "postcondition failed: insert length");
+        MethodFailedException.assert(this.doGetComponent(index) === c,
+            "postcondition failed: insert value");
+
+        this.assertInvariant();
+    }
+
+    public append(c: string): void {
+        this.assertPreValue(c);
+
+        const index = this.doGetLength();
+        const before = this.snapshot();
+
+        this.doInsert(index, c);
+
+        MethodFailedException.assert(this.doGetComponent(index) === c,
+            "postcondition failed: append");
+
+        this.assertInvariant();
+    }
+
+    public remove(index: number): void {
+        this.assertPreIndex(index);
+
+        const oldLen = this.doGetLength();
+        const before = this.snapshot();
+
+        this.doRemove(index);
+
+        MethodFailedException.assert(this.doGetLength() === oldLen - 1,
+            "postcondition failed: remove");
+
+        this.assertInvariant();
+    }
+
+    public asString(delimiter: string = "/"): string {
+        const len = this.doGetLength();
+        let out = "";
+        for (let i = 0; i < len; i++) {
+            if (i > 0) out += delimiter;
+            out += this.doGetComponent(i);
+        }
+        this.assertInvariant();
+        return out;
     }
 
     public asDataString(): string {
-        throw new Error("needs implementation or deletion");
+        return this.asString("/");
     }
 
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
+    // ============================================================
+    // PROTECTED ABSTRACT PRIMITIVES
+    // ============================================================
+
+    protected abstract doGetLength(): number;
+    protected abstract doGetComponent(index: number): string;
+
+    protected abstract doSetComponent(index: number, c: string): void;
+    protected abstract doInsert(index: number, c: string): void;
+    protected abstract doRemove(index: number): void;
+
+    // ============================================================
+    // CONTRACT HELPERS
+    // ============================================================
+
+    protected snapshot(): string[] {
+        const list: string[] = [];
+        const len = this.doGetLength();
+        for (let i = 0; i < len; i++) list.push(this.doGetComponent(i));
+        return list;
     }
 
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
+    protected assertPreIndex(index: number): void {
+        IllegalArgumentException.assert(
+            index >= 0 && index < this.doGetLength(),
+            "index out of range"
+        );
     }
 
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
+    protected assertPreInsertIndex(index: number): void {
+        IllegalArgumentException.assert(
+            index >= 0 && index <= this.doGetLength(),
+            "invalid insert index"
+        );
     }
 
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+    protected assertPreValue(c: string): void {
+        IllegalArgumentException.assert(
+            c !== null && c !== undefined,
+            "component may not be null or undefined"
+        );
     }
 
-    abstract getNoComponents(): number;
-
-    abstract getComponent(i: number): string;
-    abstract setComponent(i: number, c: string): void;
-
-    abstract insert(i: number, c: string): void;
-    abstract append(c: string): void;
-    abstract remove(i: number): void;
-
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
+    protected assertInvariant(): void {
+        InvalidStateException.assert(
+            this.doGetLength() >= 0,
+            "invariant: length must be >= 0"
+        );
     }
-
 }
